@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just A Girl Journal</title>
+    <style>
+        body {
+            background-color: #f8d1d1;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            font-size: 50px;
+            color: #ff66b2;
+        }
+        h2 {
+            font-size: 25px;
+            color: #ff3385;
+            margin-top: 10px;
+        }
+        .heart {
+            font-size: 50px;
+            color: #ff66b2;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #ff66b2;
+            color: white;
+            font-size: 20px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #ff3385;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: 1px solid #ff66b2;
+            resize: vertical;
+        }
+        #entriesList {
+            margin-top: 30px;
+            display: none;
+            background-color: #fff0f5;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .entry {
+            background-color: #fff;
+            border-left: 5px solid #ff66b2;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .entry p {
+            font-size: 18px;
+            color: #6c4f8c;
+        }
+        .entry .date {
+            font-size: 14px;
+            color: #b58b8b;
+        }
+        .menu {
+            cursor: pointer;
+            font-size: 30px;
+            margin-top: 30px;
+        }
+        /* Pretty Delete Button */
+        .delete-btn {
+            background: linear-gradient(145deg, #ff66b2, #ff3385); /* Gradient pink background */
+            color: white;
+            font-size: 14px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px; /* Rounded corners */
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth animation */
+            box-shadow: 0 4px 8px rgba(255, 105, 180, 0.3); /* Subtle shadow effect */
+        }
+        .delete-btn:hover {
+            background: linear-gradient(145deg, #ff3385, #ff66b2); /* Inverted gradient on hover */
+            transform: scale(1.1); /* Slight grow effect on hover */
+            box-shadow: 0 8px 16px rgba(255, 105, 180, 0.5); /* Increased shadow on hover */
+        }
+        .delete-btn:active {
+            transform: scale(1.05); /* Slight shrink effect when clicked */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Welcome Section -->
+    <div id="welcome-section">
+        <h1>Just A Girl Journal</h1>
+        <div class="heart">❤️</div>
+        <h2>Gaslight. Gatekeep. Girlboss.</h2>
+        <p>Click the button below to start making your journal entries!</p>
+        
+        <button onclick="showJournalSection()">Make an Entry</button>
+    </div>
+
+    <!-- Journal Section -->
+    <div id="journal-section" style="display:none;">
+        <h1>Just A Girl Journal</h1>
+        <h2>Write down your thoughts <span style="font-size: 14px; color: #ff66b2;">(remember. you're just a girl ❤️)</span></h2>
+        
+        <textarea id="journalEntry" rows="5" placeholder="What's on your mind?"></textarea>
+        <button onclick="saveEntry()">Save Entry</button>
+
+        <!-- Three dots menu -->
+        <div class="menu" onclick="toggleEntries()">⋮ Show Entries</div>
+
+        <!-- Saved Entries will appear here -->
+        <div id="entriesList"></div>
+
+        <br>
+        <button onclick="goBackToWelcome()">Back to Welcome</button>
+    </div>
+
+    <script>
+        // Initialize an empty array to hold the entries
+        let entries = [];
+
+        // Retrieve entries from localStorage on page load
+        window.onload = function() {
+            const savedEntries = JSON.parse(localStorage.getItem('journalEntries'));
+            if (savedEntries) {
+                entries = savedEntries;
+                showEntries();
+            }
+        }
+
+        // Function to switch to the journal section
+        function showJournalSection() {
+            document.getElementById('welcome-section').style.display = "none";
+            document.getElementById('journal-section').style.display = "block";
+        }
+
+        // Function to save the entry
+        function saveEntry() {
+            var entryText = document.getElementById('journalEntry').value;
+            if (entryText.trim() !== "") {
+                var currentDate = new Date();
+                var formattedDate = currentDate.toLocaleString(); // Format the date and time
+
+                // Add the new entry to the entries array
+                entries.push({ text: entryText, date: formattedDate });
+
+                // Save entries to localStorage
+                localStorage.setItem('journalEntries', JSON.stringify(entries));
+
+                // Clear the textarea
+                document.getElementById('journalEntry').value = "";
+
+                // Show a success message or just update the list of entries
+                alert("Your entry has been saved!");
+
+                // Automatically refresh the list of entries
+                showEntries();
+            } else {
+                alert("Please write something before saving.");
+            }
+        }
+
+        // Function to display the entries
+        function showEntries() {
+            var entriesList = document.getElementById('entriesList');
+            entriesList.innerHTML = ""; // Clear existing entries
+
+            // Loop through entries array and display each entry
+            entries.forEach(function(entry, index) {
+                var entryDiv = document.createElement('div');
+                entryDiv.classList.add('entry');
+
+                var entryText = document.createElement('p');
+                entryText.textContent = entry.text;
+                entryDiv.appendChild(entryText);
+
+                var entryDate = document.createElement('div');
+                entryDate.classList.add('date');
+                entryDate.textContent = "Posted on: " + entry.date;
+                entryDiv.appendChild(entryDate);
+
+                // Create the delete button
+                var deleteBtn = document.createElement('button');
+                deleteBtn.textContent = "Delete Entry";
+                deleteBtn.classList.add('delete-btn');
+                deleteBtn.onclick = function() {
+                    deleteEntry(index);  // Pass the index to delete
+                };
+                entryDiv.appendChild(deleteBtn);
+
+                entriesList.appendChild(entryDiv);
+            });
+        }
+
+        // Function to toggle visibility of the entries list
+        function toggleEntries() {
+            var entriesList = document.getElementById('entriesList');
+            if (entriesList.style.display === "none" || entriesList.style.display === "") {
+                entriesList.style.display = "block";
+                showEntries();
+            } else {
+                entriesList.style.display = "none";
+            }
+        }
+
+        // Function to delete an entry
+        function deleteEntry(index) {
+            // Remove the entry from the array
+            entries.splice(index, 1);
+
+            // Save updated entries to localStorage
+            localStorage.setItem('journalEntries', JSON.stringify(entries));
+
+            // Refresh the list of entries
+            showEntries();
+        }
+
+        // Function to go back to the welcome section
+        function goBackToWelcome() {
+            document.getElementById('journal-section').style.display = "none";
+            document.getElementById('welcome-section').style.display = "block";
+        }
+    </script>
+</body>
+</html>
